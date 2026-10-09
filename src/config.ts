@@ -34,7 +34,7 @@ export function loadTestConfig(environment: NodeJS.ProcessEnv = readEnvironment(
 export function loadDemoConfig(environment: NodeJS.ProcessEnv = readEnvironment()) {
   const result = z.object({
     ADMIN_TOKEN: z.string().trim().min(12),
-    DEMO_BASE_URL: httpUrl.default("http://localhost:18080"),
+    DEMO_BASE_URL: httpUrl.default("http://127.0.0.1:18080"),
   }).safeParse(environment);
   if (!result.success) throw configurationError(result.error);
   return result.data;
@@ -65,7 +65,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = readEnvironment()): 
     LLM_MODEL:
       environment["LLM_MODEL"]?.trim() ||
       (endpoint === "https://openrouter.ai/api/v1/chat/completions"
-        ? "google/gemma-4-26b-a4b-it:free"
+        ? "apodex/apodex-1.1-mini:free"
         : undefined),
   });
   if (!result.success)

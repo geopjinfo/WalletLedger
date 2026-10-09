@@ -48,9 +48,8 @@ function show(title: string, text: string): void {
   console.log(`\n## ${title}\n\n${text}`);
 }
 
-const suffix = randomUUID().slice(0, 8);
-const sender = await person(`Asha ${suffix}`);
-const recipient = await person(`Rahul ${suffix}`);
+const sender = await person("Asha");
+const recipient = await person("Rahul");
 const topup = await post("/transfers/topup", { wallet_id: sender.wallet, amount: 100000 }, sender.token);
 const funding = transferSchema.parse(JSON.parse(topup.text));
 if (funding.status === "held") await post(`/admin/risk/${funding.id}/decision`, { decision: "release" }, admin);
@@ -79,7 +78,7 @@ if (!held) throw new Error("Velocity rule did not hold the sixth request");
 show("Admin decision", (await post(`/admin/risk/${held}/decision`, { decision: "release" }, admin)).text);
 show("Reconciliation", (await post("/admin/reconciliation/run", {}, admin)).text);
 const day = new Date().toISOString().slice(0, 10);
-const question = `sent to Rahul ${suffix} from ${day} to ${day}`;
+const question = `sent to Rahul from ${day} to ${day}`;
 const answer = await post(`/users/${sender.id}/statement/ask`, { question }, sender.token);
 if (z.object({ value: z.string() }).parse(JSON.parse(answer.text)).value !== "6000") throw new Error("Unexpected statement total");
 show("Statement question", `${question}\n${answer.text}\nExpected: 6000 paise across six posted peer transfers.`);

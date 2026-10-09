@@ -524,7 +524,7 @@ test("statement answers use caller rows for 10 examples and ignore injected note
     LLM_MODEL: "",
   });
   assert.equal(openRouter.LLM_BASE_URL, "https://openrouter.ai/api/v1/chat/completions");
-  assert.equal(openRouter.LLM_MODEL, "google/gemma-4-26b-a4b-it:free");
+  assert.equal(openRouter.LLM_MODEL, "apodex/apodex-1.1-mini:free");
   assert.throws(() => loadConfig({ DATABASE_URL: "https://example.test", ADMIN_TOKEN: "test-admin-token" }), /DATABASE_URL/);
   assert.throws(() => loadConfig({ DATABASE_URL: url, ADMIN_TOKEN: "test-admin-token", PORT: "65536" }), /PORT/);
   assert.throws(() => loadConfig({ DATABASE_URL: url, ADMIN_TOKEN: "test-admin-token", LLM_BASE_URL: "https://example.test" }), /LLM_API_KEY/);
@@ -543,6 +543,7 @@ test("statement answers use caller rows for 10 examples and ignore injected note
       const payload = z.object({
         model: z.string(),
         response_format: z.object({ type: z.literal("json_object") }),
+        reasoning: z.object({ enabled: z.literal(false) }),
         provider: z.object({
           require_parameters: z.literal(true),
           max_price: z.object({ prompt: z.literal(0), completion: z.literal(0) }),

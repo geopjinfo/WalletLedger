@@ -26,7 +26,7 @@ Task states: TODO, In progress, Blocked, Done. A task becomes Done only when its
 1. Submit https://github.com/geopjinfo/WalletLedger with the included demo and documentation.
 2. Review the included captioned five-minute API demo and captured response transcript.
 
-Per-rule latency and query plans are recorded in `docs/performance.md`. Concurrent fraud checks and malformed provider output checks pass. Live provider behavior remains unverified without provider configuration; the assignment tests use mocked HTTP and the deterministic provider.
+Per-rule latency and query plans are recorded in `docs/performance.md`. Concurrent fraud checks and malformed provider output checks pass. Live provider behavior was verified with Apodex on 9 October 2026; the assignment tests use mocked HTTP and the deterministic provider.
 
 Current API: `http://localhost:18080`. Run `docker compose up --build` to start the services. Local tests, fresh-database container tests, strict type checks, and builds pass. Submission committed and pushed to https://github.com/geopjinfo/WalletLedger. Hosted checks passed: https://github.com/geopjinfo/WalletLedger/actions/runs/37912965222.
 
@@ -58,7 +58,7 @@ Current API: `http://localhost:18080`. Run `docker compose up --build` to start 
 | D12 | Selected, 2026-10-09 | Advisory guard plus unique idempotency keys; save response text | Gives bounded 409 processing responses and byte-for-byte replay without JSONB field reordering |
 | D13 | Selected, 2026-10-09 | Persist all reconciliation findings and group root issues | Reports exactly the three fixture corruptions while retaining dependent mismatches in check_result |
 | D14 | Selected, 2026-10-09 | UTC date boundaries; full reversals; cancel unposted holds | Keeps time and ledger semantics explicit; details are documented in README |
-| D15 | Selected, 2026-10-09 | OpenRouter with google/gemma-4-26b-a4b-it:free when a key is provided | Released free model supports JSON output; one environment key enables it, price ceilings retain free routing, and the mock keeps tests independent of credentials |
+| D15 | Selected, 2026-10-09 | OpenRouter with apodex/apodex-1.1-mini:free when a key is provided | Released free model supports JSON output; live wallet questions and flag explanations passed; price ceilings retain free routing and the mock keeps tests independent of credentials |
 
 Remaining open decisions and limitations are documented in README and the unchecked tasks. Record changes here with the date, choice, and reason; carry final design assumptions into the README. Open questions are listed in section 8, and their resolution should update the relevant decision and task.
 
@@ -328,7 +328,7 @@ These agreed checks apply previous-project feedback to the wallet requirements. 
 | Identity | Choose the minimum mechanism enforcing caller ownership and administrator access | Ownership and admin permissions are enforced and auditable; JWT is used only if selected | The brief requires caller isolation, not a specific authentication product |
 | Boundary handling | Validate integer money bounds and pagination bounds; keep deterministic account lock ordering | Invalid/overflowing amounts cannot wrap or partially post; pagination has documented limits; concurrent posting locks accounts in ascending order | Addresses essential correctness and bounded resource use within existing features |
 
-The implementation addresses these review items; final acceptance evidence is recorded above. Hosted CI passed. The five-minute captioned API demo is included; live remote-provider verification is optional and remains unverified. No caching or rate-limiting feature is added. Fraud velocity rules remain required and are distinct from API rate limiting.
+The implementation addresses these review items; final acceptance evidence is recorded above. Hosted CI passed. The five-minute captioned API demo is included; live remote-provider verification passed with Apodex. No caching or rate-limiting feature is added. Fraud velocity rules remain required and are distinct from API rate limiting.
 
 Selected configuration: PostgreSQL 16.13 with UTF-8; opaque bearer identity; held transfers can be posted or rejected, and posted originals can be reversed; KYC starts pending with verified/rejected stored values; pagination limit is 1-100 and offset is 0-1,000,000. Hosted CI passed; the demo and captured responses are included. A live LLM endpoint, model, and key are optional configuration for real-provider verification.
 
