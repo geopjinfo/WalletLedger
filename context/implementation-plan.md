@@ -2,11 +2,11 @@
 
 Source: Airtribe digital wallet backend assignment, `Airtribe.pdf`, pages 1-10, including the image tables on pages 5, 7, and 9.
 
-Status: Backend implemented and running locally. Required local acceptance scenarios pass; final review and submission remain in progress.
+Status: Required implementation, local verification, hosted acceptance checks, documentation and five-minute captioned API demo are complete.
 
 ## Overall progress
 
-Updated: 2026-10-09. Required task checklist: **73/75 complete (97%)**. Node.js 22, strict TypeScript, Fastify, and PostgreSQL 16.13 are running locally. All six acceptance scenarios pass, including 20 stampede runs, on both local and container runs. Migrations were verified from an empty database; UTF-8 and million-entry query plans were verified. Focused checks also cover concurrent fraud boundaries and malformed provider output.
+Updated: 2026-10-09. Required task checklist: **75/75 complete (100%)**. Node.js 22, strict TypeScript, Fastify, and PostgreSQL 16.13 are running locally. All six acceptance scenarios pass, including 20 stampede runs, on both local and container runs. Migrations were verified from an empty database; UTF-8 and million-entry query plans were verified. Focused checks also cover concurrent fraud boundaries and malformed provider output.
 
 Task states: TODO, In progress, Blocked, Done. A task becomes Done only when its output and relevant acceptance evidence meet the Definition of Done. Checked items have local evidence; unchecked items remain TODO. Optional work is excluded from required progress.
 
@@ -19,16 +19,16 @@ Task states: TODO, In progress, Blocked, Done. A task becomes Done only when its
 | Idempotency | Done | Required sequential, parallel, mismatch, and replay behavior pass |
 | Reconciliation | Done | Five checks, exclusive nightly/manual runs, corruption report, and query plans verified |
 | Fraud and Q&A | Done locally | Three rules, admin decisions, explanations, four question types, injection test, and 10 sample answers verified; remote provider exercised with mocked HTTP |
-| Submission | In progress | Required seed data, CI, README, and five-minute demo delivered |
+| Submission | Done | Required seed data, CI, README, and five-minute demo delivered |
 
 ### Next TODOs
 
-1. Run the configured CI workflow after connecting the repository to its remote.
+1. Submit https://github.com/geopjinfo/WalletLedger with the included demo and documentation.
 2. Review the included captioned five-minute API demo and captured response transcript.
 
 Per-rule latency and query plans are recorded in `docs/performance.md`. Concurrent fraud checks and malformed provider output checks pass. Live provider behavior remains unverified without provider configuration; the assignment tests use mocked HTTP and the deterministic provider.
 
-Current API: `http://localhost:18080`. Run `docker compose up --build` to start the services. Local tests, fresh-database container tests, strict type checks, and builds pass. Submission files reviewed and explicitly staged; hosted CI is pending the first push.
+Current API: `http://localhost:18080`. Run `docker compose up --build` to start the services. Local tests, fresh-database container tests, strict type checks, and builds pass. Submission committed and pushed to https://github.com/geopjinfo/WalletLedger. Hosted checks passed: https://github.com/geopjinfo/WalletLedger/actions/runs/37912965222.
 
 ### Definition of Done
 
@@ -247,7 +247,7 @@ Keep tests focused on basic behavior, the brief's mandatory acceptance scenarios
 - [x] Fraud threshold boundaries, concurrent velocity evaluation, hold/release behavior, and administrator authorization.
 - [x] Caller-scoped Q&A, prompt-injection resistance, invalid LLM output, and 10 expected-answer examples.
 - [x] Query-plan evidence for reconciliation, fraud rules, and deep statement pagination.
-- [ ] CI runs the required tests using the mock LLM provider.
+- [x] CI runs the required tests using the mock LLM provider.
 
 ## 7. Submission checklist
 
@@ -255,7 +255,7 @@ Keep tests focused on basic behavior, the brief's mandatory acceptance scenarios
 - [x] `docker compose up` starts PostgreSQL, API, and worker.
 - [x] Complete migrations from an empty database.
 - [x] `docs/schema.md` and `docs/isolation.md`.
-- [ ] Passing stampede, idempotency, reconciliation, and prompt-injection tests in CI.
+- [x] Passing stampede, idempotency, reconciliation, and prompt-injection tests in CI.
 - [x] Seed script creating 1,000 users, 2,000 wallets, and 100,000 transfers.
 - [x] Seed data can be extended to one million ledger entries for the required query-plan measurements; no separate fixture framework is needed.
 - [x] README covering assumptions, design questions, trade-offs, setup, test commands, and next steps.
@@ -327,6 +327,12 @@ These agreed checks apply previous-project feedback to the wallet requirements. 
 | Identity | Choose the minimum mechanism enforcing caller ownership and administrator access | Ownership and admin permissions are enforced and auditable; JWT is used only if selected | The brief requires caller isolation, not a specific authentication product |
 | Boundary handling | Validate integer money bounds and pagination bounds; keep deterministic account lock ordering | Invalid/overflowing amounts cannot wrap or partially post; pagination has documented limits; concurrent posting locks accounts in ascending order | Addresses essential correctness and bounded resource use within existing features |
 
-The implementation addresses these review items; final acceptance evidence is recorded above. Hosted CI remains pending. The five-minute captioned API demo is included; live remote-provider verification is optional and remains unverified. No caching or rate-limiting feature is added. Fraud velocity rules remain required and are distinct from API rate limiting.
+The implementation addresses these review items; final acceptance evidence is recorded above. Hosted CI passed. The five-minute captioned API demo is included; live remote-provider verification is optional and remains unverified. No caching or rate-limiting feature is added. Fraud velocity rules remain required and are distinct from API rate limiting.
 
-Selected configuration: PostgreSQL 16.13 with UTF-8; opaque bearer identity; held transfers can be posted or rejected, and posted originals can be reversed; KYC starts pending with verified/rejected stored values; pagination limit is 1-100 and offset is 0-1,000,000. Submission still needs a hosted CI run; the demo and captured responses are included. A live LLM endpoint, model, and key are optional configuration for real-provider verification.
+Selected configuration: PostgreSQL 16.13 with UTF-8; opaque bearer identity; held transfers can be posted or rejected, and posted originals can be reversed; KYC starts pending with verified/rejected stored values; pagination limit is 1-100 and offset is 0-1,000,000. Hosted CI passed; the demo and captured responses are included. A live LLM endpoint, model, and key are optional configuration for real-provider verification.
+
+### Final submission review
+
+The brief and all three image tables were rechecked. Reviewer setup, isolated Docker tests, exact seed commands, API walkthrough, ten expected question answers, and the five-minute captioned API video are included. All six acceptance suites passed locally and on GitHub. The video contains actual response data and explanatory captions; it has no narration and is not a live screen recording. The app database remains separate from destructive test fixtures.
+
+Remaining required open questions: none. Live provider verification remains optional. Documented assumptions include full reversals, held-transfer cancellation, historical Q&A totals, system-account fraud checks, and two-line reconciliation root grouping. No additional product features were added.

@@ -2,7 +2,7 @@ name: Tests
 on: [push, pull_request]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16.13-bookworm
@@ -16,8 +16,8 @@ jobs:
       DATABASE_URL: postgres://wallet:wallet-test@localhost:5432/wallet_test
       ALLOW_TEST_RESET: "true"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: "22"
           cache: npm

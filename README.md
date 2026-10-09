@@ -107,4 +107,4 @@ Stored balances add writes and consistency checks but avoid summing a wallet's f
 
 For deployment, use a restricted database role for the API and separate privileged migration/fixture roles, replace the development credentials, and verify the selected remote LLM provider. Cursor pagination would address deep-offset cost. Those changes are outside the required local submission.
 
-The captioned five-minute API demo is included. Hosted CI is pending the first push. Optional cursor pagination, key expiry, caching, rate limiting, and sharding are outside this build.
+The captioned five-minute API demo is included. [Hosted acceptance checks passed](https://github.com/geopjinfo/WalletLedger/actions/runs/37912965222), including strict type checking, build, empty-database migrations and all six test scenarios. Optional cursor pagination, key expiry, caching, rate limiting, and sharding are outside this build.
