@@ -36,6 +36,6 @@ The default mock accepts these templates with explicit dates:
 - `largest transfer from 2026-08-01 to 2026-08-31`
 - `number of transfers from 2026-08-01 to 2026-08-31`
 
-A configured provider can interpret other phrasing into those four validated question types. No generated SQL is executed. Unsupported or invalid date questions return 422. Values come from database rows; returned IDs identify the contributing events.
+A configured provider can interpret other phrasing into those four validated question types. OpenRouter uses the current UTC date as context for relative dates such as last month; see README for key setup. No generated SQL is executed. Unsupported or invalid date questions return 422; provider unavailability, rate limits, or timeout return 503. Values come from database rows; returned IDs identify the contributing events.
 
 Admin rejection is used for held transfers because no money has moved; the brief's wording about reversing a hold is interpreted as cancelling it. Posted transfers use the separate reversal endpoint. Manual reconciliation currently completes the checks before returning its 202 report; it does not require polling to begin execution.

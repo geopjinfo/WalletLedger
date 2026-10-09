@@ -58,6 +58,7 @@ Current API: `http://localhost:18080`. Run `docker compose up --build` to start 
 | D12 | Selected, 2026-10-09 | Advisory guard plus unique idempotency keys; save response text | Gives bounded 409 processing responses and byte-for-byte replay without JSONB field reordering |
 | D13 | Selected, 2026-10-09 | Persist all reconciliation findings and group root issues | Reports exactly the three fixture corruptions while retaining dependent mismatches in check_result |
 | D14 | Selected, 2026-10-09 | UTC date boundaries; full reversals; cancel unposted holds | Keeps time and ledger semantics explicit; details are documented in README |
+| D15 | Selected, 2026-10-09 | OpenRouter with google/gemma-4-26b-a4b-it:free when a key is provided | Released free model supports JSON output; one environment key enables it, price ceilings retain free routing, and the mock keeps tests independent of credentials |
 
 Remaining open decisions and limitations are documented in README and the unchecked tasks. Record changes here with the date, choice, and reason; carry final design assumptions into the README. Open questions are listed in section 8, and their resolution should update the relevant decision and task.
 

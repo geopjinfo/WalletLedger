@@ -23,6 +23,10 @@ services:
       ADMIN_TOKEN: local-admin-change-me
       PORT: "3000"
       RECONCILIATION_HOUR_UTC: "0"
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
     depends_on:
       postgres:
         condition: service_healthy

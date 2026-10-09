@@ -44,13 +44,35 @@ See the [five-minute captioned demo](docs/demo.mp4), [captured responses](docs/d
 | ADMIN_TOKEN | Administrator bearer token, at least 12 characters; required for API/worker |
 | PORT | API port, defaults to 3000 |
 | RECONCILIATION_HOUR_UTC | Nightly hour, 0-23; defaults to midnight UTC (04:00 Dubai) |
-| LLM_BASE_URL | Optional OpenAI-compatible chat-completions endpoint |
-| LLM_API_KEY, LLM_MODEL | Required when a remote provider is configured |
+| OPENROUTER_API_KEY | Enables OpenRouter with the default free model; optional |
+| LLM_BASE_URL | Optional full chat-completions endpoint override |
+| LLM_API_KEY | Optional key override; takes precedence over OPENROUTER_API_KEY |
+| LLM_MODEL | Optional model override; OpenRouter defaults to google/gemma-4-26b-a4b-it:free |
 | ALLOW_TEST_RESET | Must be true to permit destructive test fixtures |
 | ALLOW_SEED_RESET | Must be true to permit replacing data with seed fixtures |
 | SEED_TRANSFERS | Seed transfer count, defaults to 100,000; range 10,000-1,000,000 |
 
 Missing configuration fails at startup. No listeners or jobs start when `app.ts` is imported. `server.ts` and `worker.ts` are independent process entry points.
+
+### OpenRouter
+
+Create `.env` in the repository root and add your key:
+
+```dotenv
+OPENROUTER_API_KEY=your-key-here
+```
+
+Then rebuild/recreate the API and worker so Compose passes the setting to both processes:
+
+```sh
+docker compose up --build -d api worker
+```
+
+With a key, the endpoint defaults to `https://openrouter.ai/api/v1/chat/completions` and the model to `google/gemma-4-26b-a4b-it:free`. This released model currently supports JSON responses; availability and free-tier limits can change. [Model details](https://openrouter.ai/google/gemma-4-26b-a4b-it:free). Requests require parameter support and use zero prompt/completion price ceilings, with no paid-model fallback. JSON is still validated by the application. Requests time out after 45 seconds; provider errors and rate limits return `LLM_UNAVAILABLE` (503), and flag explanations remain pending for a later worker run.
+
+Without a key or explicit remote settings, the deterministic mock remains active. The isolated tests always use mocked responses. Live OpenRouter inference has not been verified without a key. `.env` is already excluded from Git and Docker builds. For local Node processes, export the same variables in your shell; Compose's `.env` loading does not apply to `npm start`.
+
+To change the free model later, set `LLM_MODEL` to another compatible `:free` model. For a different provider, supply all three generic LLM settings. Q&A sends the question and current UTC date; flag explanations send rule details and the last ten transfers, including their notes. Only application-owned SQL computes statement answers.
 
 ## API
 

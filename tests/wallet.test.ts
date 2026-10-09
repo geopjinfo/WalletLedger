@@ -12,6 +12,7 @@ import { reconcile } from "../src/modules/reconciliation/service.js";
 import { explainFlags } from "../src/modules/statements/service.js";
 import type { Json } from "../src/shared/types.js";
 import { seed } from "../scripts/seed.js";
+import { loadConfig } from "../src/config.js";
 const url = process.env["DATABASE_URL"];
 if (!url || process.env["ALLOW_TEST_RESET"] !== "true")
   throw new Error(
@@ -515,23 +516,42 @@ test("statement answers use caller rows for 10 examples and ignore injected note
     422,
   );
   let providerReply = "not-json";
+  let providerStatus = 200;
+  const openRouter = loadConfig({
+    DATABASE_URL: url,
+    ADMIN_TOKEN: "test-admin-token",
+    OPENROUTER_API_KEY: "fixture-key",
+    LLM_BASE_URL: "",
+    LLM_MODEL: "",
+  });
+  assert.equal(openRouter.LLM_BASE_URL, "https://openrouter.ai/api/v1/chat/completions");
+  assert.equal(openRouter.LLM_MODEL, "google/gemma-4-26b-a4b-it:free");
+  assert.equal(
+    loadConfig({ DATABASE_URL: url, ADMIN_TOKEN: "test-admin-token", OPENROUTER_API_KEY: "" }).LLM_BASE_URL,
+    undefined,
+  );
   const mockedFetch = context.mock.method(
     globalThis,
     "fetch",
-    async () =>
-      new Response(
+    async (input: string | URL | Request, init?: RequestInit) => {
+      assert.equal(input, openRouter.LLM_BASE_URL);
+      assert.equal(new Headers(init?.headers).get("authorization"), "Bearer fixture-key");
+      const payload = z.object({
+        model: z.string(),
+        response_format: z.object({ type: z.literal("json_object") }),
+        provider: z.object({
+          require_parameters: z.literal(true),
+          max_price: z.object({ prompt: z.literal(0), completion: z.literal(0) }),
+        }),
+      }).parse(JSON.parse(String(init?.body)));
+      assert.equal(payload.model, openRouter.LLM_MODEL);
+      return new Response(
         JSON.stringify({ choices: [{ message: { content: providerReply } }] }),
-      ),
+        { status: providerStatus },
+      );
+    },
   );
-  const remote = new RemoteProvider({
-    DATABASE_URL: url,
-    ADMIN_TOKEN: "test-admin-token",
-    PORT: 3000,
-    RECONCILIATION_HOUR_UTC: 0,
-    LLM_BASE_URL: "https://example.test/completions",
-    LLM_API_KEY: "fixture-key",
-    LLM_MODEL: "fixture-model",
-  });
+  const remote = new RemoteProvider(openRouter);
   for (const invalid of [
     "not-json",
     '{"type":0,"from":"2026-08-01","to":"2026-08-31"}',
@@ -541,6 +561,12 @@ test("statement answers use caller rows for 10 examples and ignore injected note
       code: "UNSUPPORTED_QUESTION",
     });
   }
+  providerReply = '{"type":2,"from":"2026-08-01","to":"2026-08-31"}';
+  assert.equal((await remote.interpret("received in August 2026")).type, 2);
+  providerReply = '{"explanation":"The velocity threshold was exceeded. Review the recent payments.","label":"review"}';
+  assert.equal((await remote.explain({ rule: "velocity", transfers: [] })).label, "review");
+  providerStatus = 429;
+  await assert.rejects(remote.interpret("received in August 2026"), { code: "LLM_UNAVAILABLE" });
   mockedFetch.mock.restore();
 });
 
