@@ -1,8 +1,8 @@
 import { readdir, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createPool, transaction } from "./pool.js";
-const url = process.env["DATABASE_URL"];
-if (!url) throw new Error("DATABASE_URL is required");
+import { loadDatabaseConfig } from "../config.js";
+const url = loadDatabaseConfig().DATABASE_URL;
 const pool = createPool(url);
 try {
   await transaction(pool, "migration", async (client) => {

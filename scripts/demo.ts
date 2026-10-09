@@ -1,10 +1,11 @@
 import { randomInt, randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { Json } from "../src/shared/types.js";
+import { loadDemoConfig } from "../src/config.js";
 
-const base = process.env["DEMO_BASE_URL"] ?? "http://localhost:18080";
-const admin = process.env["ADMIN_TOKEN"];
-if (!admin) throw new Error("ADMIN_TOKEN is required for the demo");
+const config = loadDemoConfig();
+const base = config.DEMO_BASE_URL;
+const admin = config.ADMIN_TOKEN;
 const userSchema = z.object({ id: z.string(), token: z.string() });
 const walletSchema = z.object({ id: z.string() });
 const transferSchema = z.object({ id: z.string(), status: z.string() });

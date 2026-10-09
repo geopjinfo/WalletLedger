@@ -64,9 +64,10 @@ export function registerTransfersRoutes({
         }),
       );
     });
-  post("/transfers/:id/reverse", async (r, who, client) =>
-    transferResponse(await reverseTransfer(client, who, parameter(r))),
-  );
+  post("/transfers/:id/reverse", async (r, who, client) => {
+    validation.emptyBody.parse(r.body);
+    return transferResponse(await reverseTransfer(client, who, parameter(r)));
+  });
   app.get<Route>("/transfers/:id", async (r) => {
     const who = await identity(r);
     const t = first(

@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: wallet-local
       POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C
     ports:
-      - "127.0.0.1:5433:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
     volumes:
       - wallet-data:/var/lib/postgresql/data
     healthcheck:
@@ -20,9 +20,11 @@ services:
     command: npm run migrate
     environment: &app-env
       DATABASE_URL: postgres://wallet:wallet-local@postgres:5432/wallet
-      ADMIN_TOKEN: local-admin-change-me
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-local-admin-change-me}
       PORT: "3000"
-      RECONCILIATION_HOUR_UTC: "0"
+      RECONCILIATION_HOUR_UTC: ${RECONCILIATION_HOUR_UTC:-0}
+      ALLOW_SEED_RESET: ${ALLOW_SEED_RESET:-false}
+      SEED_TRANSFERS: ${SEED_TRANSFERS:-100000}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       LLM_BASE_URL: ${LLM_BASE_URL:-}
       LLM_API_KEY: ${LLM_API_KEY:-}

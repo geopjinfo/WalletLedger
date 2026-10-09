@@ -12,12 +12,8 @@ import { reconcile } from "../src/modules/reconciliation/service.js";
 import { explainFlags } from "../src/modules/statements/service.js";
 import type { Json } from "../src/shared/types.js";
 import { seed } from "../scripts/seed.js";
-import { loadConfig } from "../src/config.js";
-const url = process.env["DATABASE_URL"];
-if (!url || process.env["ALLOW_TEST_RESET"] !== "true")
-  throw new Error(
-    "Tests require DATABASE_URL and ALLOW_TEST_RESET=true for a disposable database",
-  );
+import { loadConfig, loadSeedConfig, loadTestConfig } from "../src/config.js";
+const url = loadTestConfig().DATABASE_URL;
 const pool = createPool(url);
 const provider = new MockProvider();
 const app = buildApp(
@@ -143,6 +139,9 @@ test("basic money flow, validation, ownership, reversal and immutable constraint
   );
   assert.equal(sent.statusCode, 201, sent.body);
   const id = z.object({ id: z.string() }).parse(sent.json()).id;
+  assert.equal((await request(`/transfers/${id}/reverse`, { extra: true }, a.token)).statusCode, 400);
+  assert.equal((await request("/admin/reconciliation/run", { extra: true }, "test-admin-token")).statusCode, 400);
+  assert.equal((await app.inject({ method: "GET", url: `/wallets/${a.wallet}/statement?extra=1`, headers: { authorization: `Bearer ${a.token}` } })).statusCode, 400);
   assert.equal(
     (
       await request(
@@ -526,6 +525,11 @@ test("statement answers use caller rows for 10 examples and ignore injected note
   });
   assert.equal(openRouter.LLM_BASE_URL, "https://openrouter.ai/api/v1/chat/completions");
   assert.equal(openRouter.LLM_MODEL, "google/gemma-4-26b-a4b-it:free");
+  assert.throws(() => loadConfig({ DATABASE_URL: "https://example.test", ADMIN_TOKEN: "test-admin-token" }), /DATABASE_URL/);
+  assert.throws(() => loadConfig({ DATABASE_URL: url, ADMIN_TOKEN: "test-admin-token", PORT: "65536" }), /PORT/);
+  assert.throws(() => loadConfig({ DATABASE_URL: url, ADMIN_TOKEN: "test-admin-token", LLM_BASE_URL: "https://example.test" }), /LLM_API_KEY/);
+  assert.throws(() => loadSeedConfig({ DATABASE_URL: url, ALLOW_SEED_RESET: "yes" }), /ALLOW_SEED_RESET/);
+  assert.equal(loadSeedConfig({ DATABASE_URL: url }).ALLOW_SEED_RESET, false);
   assert.equal(
     loadConfig({ DATABASE_URL: url, ADMIN_TOKEN: "test-admin-token", OPENROUTER_API_KEY: "" }).LLM_BASE_URL,
     undefined,

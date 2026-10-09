@@ -2,8 +2,8 @@ import { writeFile } from "node:fs/promises";
 import { createPool } from "../src/database/pool.js";
 import { reconciliationChecks } from "../src/modules/reconciliation/queries.js";
 import { checkRisk, riskQueries } from "../src/modules/risk/service.js";
-const url = process.env["DATABASE_URL"];
-if (!url) throw new Error("DATABASE_URL required");
+import { loadDatabaseConfig } from "../src/config.js";
+const url = loadDatabaseConfig().DATABASE_URL;
 const pool = createPool(url);
 try {
   const size = await pool.query<{ count: string }>(

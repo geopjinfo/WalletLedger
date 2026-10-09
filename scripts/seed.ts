@@ -1,4 +1,5 @@
 import { createPool } from "../src/database/pool.js";
+import { loadSeedConfig } from "../src/config.js";
 export async function seed(url: string, count = 100000): Promise<void> {
   if (!Number.isSafeInteger(count) || count < 10000 || count > 1000000)
     throw new Error("Transfer count must be 10000 to 1000000");
@@ -44,11 +45,11 @@ export async function seed(url: string, count = 100000): Promise<void> {
   }
 }
 if (process.argv[1]?.replaceAll("\\", "/").endsWith("/scripts/seed.ts")) {
-  const url = process.env["DATABASE_URL"];
-  if (!url || process.env["ALLOW_SEED_RESET"] !== "true")
+  const config = loadSeedConfig();
+  if (!config.ALLOW_SEED_RESET)
     throw new Error(
       "Seeding replaces fixture data; set DATABASE_URL and ALLOW_SEED_RESET=true",
     );
-  await seed(url, Number(process.env["SEED_TRANSFERS"] ?? 100000));
+  await seed(config.DATABASE_URL, config.SEED_TRANSFERS);
   console.log("Seed complete");
 }

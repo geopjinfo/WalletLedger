@@ -21,6 +21,8 @@ Docker base URL: `http://localhost:18080` (override with `API_PORT`). A local No
 
 Statement entries are ordered by created_at DESC, id DESC. Limit is 1-100 and offset is 0-1,000,000. Transfer responses include id, source_account_id, destination_account_id, type, status, amount, note, original_transfer_id, and created_at. KYC starts pending; verification is outside the assignment API.
 
+Request bodies and pagination are strict Zod schemas: unexpected fields are rejected with 400. Reversal and manual reconciliation require an empty JSON object. IDs must be positive decimal BIGINT strings; monetary amounts must be positive safe integers. UUID keys and caller identity are validated before business operations.
+
 Example:
 
 ```json

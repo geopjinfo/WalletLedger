@@ -1,8 +1,8 @@
 import { writeFile } from "node:fs/promises";
 import { DatabaseError } from "pg";
 import { createPool } from "../src/database/pool.js";
-const url = process.env["DATABASE_URL"];
-if (!url) throw new Error("DATABASE_URL required");
+import { loadDatabaseConfig } from "../src/config.js";
+const url = loadDatabaseConfig().DATABASE_URL;
 const pool = createPool(url);
 const a = await pool.connect();
 const b = await pool.connect();

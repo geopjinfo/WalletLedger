@@ -31,7 +31,8 @@ export const decisionBody = z
 export const askBody = z
   .object({ question: z.string().trim().min(1).max(1000) })
   .strict();
+export const emptyBody = z.object({}).strict();
 export const pagination = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).max(1000000).default(0),
-});
+}).strict();
