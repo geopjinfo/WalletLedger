@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:16.13-bookworm
+    environment:
+      POSTGRES_DB: wallet
+      POSTGRES_USER: wallet
+      POSTGRES_PASSWORD: wallet-local
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - wallet-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U wallet -d wallet"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  migrate:
+    build: .
+    command: npm run migrate
+    environment: &app-env
+      DATABASE_URL: postgres://wallet:wallet-local@postgres:5432/wallet
+      ADMIN_TOKEN: local-admin-change-me
+      PORT: "3000"
+      RECONCILIATION_HOUR_UTC: "0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+  api:
+    build: .
+    environment: *app-env
+    ports:
+      - "127.0.0.1:${API_PORT:-18080}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+  worker:
+    build: .
+    command: npm run worker
+    environment: *app-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+  tests:
+    build: .
+    profiles: [test]
+    command: [sh, -c, "npm run migrate && npm run typecheck && npm run build && npm test"]
+    environment:
+      DATABASE_URL: postgres://wallet:wallet-test@test-postgres:5432/wallet_test
+      ADMIN_TOKEN: test-admin
+      ALLOW_TEST_RESET: "true"
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+  test-postgres:
+    image: postgres:16.13-bookworm
+    profiles: [test]
+    environment:
+      POSTGRES_DB: wallet_test
+      POSTGRES_USER: wallet
+      POSTGRES_PASSWORD: wallet-test
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U wallet -d wallet_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  wallet-data:

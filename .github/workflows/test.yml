@@ -1,0 +1,28 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.13-bookworm
+        env:
+          POSTGRES_USER: wallet
+          POSTGRES_PASSWORD: wallet-test
+          POSTGRES_DB: wallet_test
+        ports: [5432:5432]
+        options: --health-cmd "pg_isready -U wallet -d wallet_test" --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgres://wallet:wallet-test@localhost:5432/wallet_test
+      ALLOW_TEST_RESET: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm run migrate
+      - run: npm test
