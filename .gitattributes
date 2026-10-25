@@ -1,0 +1,2 @@
+# Cross-OS rule (Windows + Kubuntu share this checkout): LF in the working tree everywhere.
+* text=auto eol=lf
